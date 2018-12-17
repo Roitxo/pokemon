@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Randomon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://unpkg.com/vue"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="css/mdb.min.css" rel="stylesheet">
+    <!-- Your custom styles (optional) -->
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="app">
+      <ul id="HUD">
+        <li>
+          <img src="https://png.pngtree.com/svg/20170228/sprite_coin_12935.png" alt="coin">
+          <p>${{dinero}}</p>
+        </li>
+        <li>
+          <img src="https://upload.wikimedia.org/wikipedia/en/3/39/Pokeball.PNG" alt="coin">
+          <p>{{ intentos }}</p>
+        </li>
+        <li>
+          <img src="https://png.pngtree.com/svg/20170228/master_ball_12908.png" alt="coin">
+          <p>{{ masterball }}</p>
+        </li>
+      </ul>
+      <button id="pokedex" class="btn" type="button" name="button" @click="showPokedex()"><img width="70px" src="https://vignette.wikia.nocookie.net/pokemon-heroes/images/f/fe/Pokedex_Pt.png/revision/latest?cb=20140420235707"></button>
+      <div v-if="this.show == true" class="card" >
+        <table class="table" id="pokemon-list">
+          <thead>
+            <tr>
+              <th scope="col">Apariencia</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Nivel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="atrapado in atrapados" v-for="imagen in imagenes">
+              <td><img width="50px" v-bind:src="atrapado.Gif"></td>
+              <td>{{atrapado.Nombre}}</td>
+              <td>{{atrapado.Nivel}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <center>
+          <img v-if="this.resultado == 'Vamos a empezar'" src="http://rs1240.pbsrc.com/albums/gg495/iKyle10/Pokemon%20Trainer/avatar514181_1_zpsfxp46su9.gif~c200" alt="Trainer" width="300px">
+          <img v-if="this.resultado == 'Has atrapado al Pokemon'" src="https://media.giphy.com/media/j2xgBIuAgmrpS/giphy.gif" alt="Pokeball" />
+          <img v-if="this.resultado == '¡Atrapalo!'" width="300px" v-bind:src="this.gif" alt="Pokemon" />
+          <img v-if="this.resultado == 'Se te ha escapado'" src="https://media.giphy.com/media/Hwq45iwTIUBGw/giphy.gif" alt="Llorar" />
+          <h2>{{ resultado }}</h2>
+          <input type="text" v-model="texto" /> <br />
+            <button v-if="this.resultado == 'Has atrapado al Pokemon'" type="button" class="btn" @click="random()"><img width="170px" src="https://vignette.wikia.nocookie.net/es.pokemon/images/3/3a/Ruta_1_en_la_hierba_RFVH.png/revision/latest?cb=20091215051712"></button>
+          <button class="btn" v-if="this.resultado == '¡Atrapalo!'" @click="valida()"> <img width="170px" src="https://upload.wikimedia.org/wikipedia/en/3/39/Pokeball.PNG"></button>
+          <button class="btn" v-if="this.masterball > 0 && this.resultado == '¡Atrapalo!'" @click="lanzaMasterball()"> <img width="170px" src="https://vignette.wikia.nocookie.net/monster-master/images/4/48/Master_ball_by_peetzaahhh2010-d93nt8r.png/revision/latest?cb=20170523124618"></button>
+          <button class="btn" v-if="this.resultado == '¡Atrapalo!'" @click="compra()"><img width="170px" src="img/buy-pokeball.png"></button>
+          <button class="btn" v-if="this.resultado == '¡Atrapalo!'" @click="compraMasterball()"><img width="170px" src="img/buy-masterball.png"></button>
+          <button v-if="this.resultado == 'Vamos a empezar'" type="button" class="btn" @click="random()"><img width="170px" src="https://www.freeiconspng.com/uploads/playstation-button-start-26.png"></button>
+        </center>
+
+    </div>
+
+    <script>
+      const app = new Vue({
+        el: "#app",
+        data: {
+          intentos: 3,
+          texto: null,
+          resultado: "Vamos a empezar",
+          correcto: false,
+          dinero: 5,
+          name: null,
+          id: null,
+          gif: 'https://economipedia.com/wp-content/uploads/2015/11/test-de-estr%C3%A9s.png',
+          randomnum: null,
+          masterball: 0,
+          show: false,
+          atrapados: [],
+          imagenes: []
+        },
+        methods: {
+          valida: function() {
+            if (this.intentos >= 1) {
+              if (this.texto != this.name) {
+                this.intentos = this.intentos - 1;
+              } else if ((this.texto = this.name)) {
+                this.resultado = "Has atrapado al Pokemon";
+                this.dinero = this.dinero + 10;
+                if (!this.atrapados.hasOwnProperty(this.name)) {
+                  this.atrapados.push(
+                    {
+                      Nombre: this.name,
+                      Gif: this.gif,
+                      Nivel: Math.floor(Math.random() * (100 - 1 + 1)) + 1
+                    }
+                    );
+                }
+              }
+            } else if (this.intentos == 0) {
+              this.resultado = "No te quedan PokeBall, compra mas en la tienda";
+            }
+          },
+          compra: function() {
+            if (this.dinero !=0) {
+              this.resultado = "¡Atrapalo!";
+              this.intentos = this.intentos + 1;
+              this.dinero = this.dinero - 5;
+            } else {
+              alert('No tienes dinero');
+            }
+          },
+          lanzaMasterball: function(){
+            this.resultado="Has atrapado al Pokemon";
+            this.dinero = this.dinero + 10;
+            this.masterball = this.masterball - 1;
+          },
+          compraMasterball: function(){
+            if (this.dinero >= 100) {
+              this.masterball = this.masterball + 1;
+              this.dinero = this.dinero - 100;
+            } else {
+              alert('No tienes suficiente dinero');
+            }
+          },
+          showPokedex: function(){
+            if (this.show==false) {
+              this.show = true;
+            } else if (this.show ==true) {
+              this.show = false;
+            }
+
+          },
+          random: function(){
+            this.resultado =  '¡Atrapalo!';
+            this.randomnum = Math.floor(Math.random() * (54 - 1 + 1)) + 1;
+            if (this.randomnum == 1) {
+              this.name="Pidgeot";
+              this.gif="https://vignette.wikia.nocookie.net/es.pokemon/images/f/f7/Pidgeot_XY.gif/revision/latest?cb=20140807021118";
+            }
+            if (this.randomnum == 2) {
+              this.name="Pikachu";
+              this.gif="https://vignette.wikia.nocookie.net/horadeaventura/images/0/02/Pikachu.gif/revision/latest?cb=20160215003359&path-prefix=es";
+            }
+            if (this.randomnum == 3) {
+              this.name="Turtwig";
+              this.gif="https://66.media.tumblr.com/63446cda34caf16749270cb27ad71331/tumblr_nst2slTL2J1scncwdo1_500.gif";
+            }
+            if (this.randomnum == 4) {
+              this.name="Charizard";
+              this.gif="https://vignette.wikia.nocookie.net/deathbattle/images/1/1b/Charizard_%28JoshR691%29.gif/revision/latest?cb=20180402051123";
+            }
+            if (this.randomnum == 5) {
+              this.name="Sudowoodo";
+              this.gif="http://38.media.tumblr.com/daf7efe058f3fd04619114f6160e3123/tumblr_mtrk2nCddp1s6n9u5o4_400.gif";
+            }
+            if (this.randomnum == 6) {
+              this.name="Aerodactyl";
+              this.gif="http://38.media.tumblr.com/83a31ce161810eee839b3331b8f480c0/tumblr_mtrk2nCddp1s6n9u5o1_400.gif";
+            }
+            if (this.randomnum == 7) {
+              this.name="Giratina";
+              this.gif="https://media.giphy.com/media/WchI5HUEFGcgM/giphy.gif";
+            }
+            if (this.randomnum == 8) {
+                this.name="Cyndaquil";
+              this.gif="https://media2.giphy.com/media/zaiY6UOCHP8NG/giphy.gif?cid=3640f6095c1254123366343255968b2f";
+            }
+            if (this.randomnum == 9) {
+              this.name="Magikarp";
+              this.gif="http://rs387.pbsrc.com/albums/oo315/PokemonArk/Gen1/Shiny/129sf.gif~c200";
+            }
+            if (this.randomnum == 10) {
+              this.name="Darkrai";
+              this.gif="https://media.giphy.com/media/fevkdjceoSvwQ/giphy.gif";
+            }
+            if (this.randomnum == 11) {
+              this.name="Empoleon";
+              this.gif="http://38.media.tumblr.com/0461af477744296c6bb6cbbc99e53380/tumblr_n9gdocW21y1s3bc1no1_500.gif";
+            }
+            if (this.randomnum == 12) {
+              this.name="Palkia";
+              this.gif="http://31.media.tumblr.com/927cea7668201e17757f85b6fd8be189/tumblr_msklnbAYbs1s3bc1no3_r1_400.gif";
+            }
+            if (this.randomnum == 13) {
+              this.name="Staraptor";
+              this.gif="https://images.wikidexcdn.net/mwuploads/wikidex/c/c2/latest/20140821163609/Staraptor_XY_hembra.gif";
+            }
+            if (this.randomnum == 14) {
+              this.name="Abra";
+              this.gif="http://rs248.pbsrc.com/albums/gg199/alex061095/Pokemon%20Sprites/abra.gif~c200";
+            }
+            if (this.randomnum == 15) {
+              this.name="Chimchar";
+              this.gif="http://fdzeta.com/data/MetaMirrorCache/_media_qTHCj6MOdTnAk_giphy.gif";
+            }
+            if (this.randomnum == 16) {
+              this.name="Golbat";
+              this.gif="https://vignette.wikia.nocookie.net/pokemon-fano/images/c/c8/Golbat_XY.gif/revision/latest?cb=20140521024340";
+            }
+            if (this.randomnum == 17) {
+              this.name="Zubat";
+              this.gif="http://31.media.tumblr.com/b102a815d16294b9258d6c3160a17bda/tumblr_mpbqg347i11s3bc1no3_400.gif";
+            }
+            if (this.randomnum == 18) {
+              this.name="Raichu";
+              this.gif="https://vignette.wikia.nocookie.net/pokpiruleta/images/9/9c/Raichu_XY.gif/revision/latest?cb=20140624164157&path-prefix=es";
+            }
+            if (this.randomnum == 19) {
+              this.name="Roserade";
+              this.gif="http://rs592.pbsrc.com/albums/tt4/GOAfox9/Pokemon%20Spirits/roseradeF.gif~c200";
+            }
+            if (this.randomnum == 20) {
+              this.name="Gyarados";
+              this.gif="https://vignette.wikia.nocookie.net/es.pokemon/images/4/44/Gyarados_XY.gif/revision/latest?cb=20140809162956";
+            }
+            if (this.randomnum == 21) {
+              this.name="Articuno";
+              this.gif="https://vignette.wikia.nocookie.net/pokemon/images/2/20/Articuno_XY_Shiny_Sprite.gif/revision/latest?cb=20141026053900";
+            }
+            if (this.randomnum == 22) {
+              this.name="Metapod";
+              this.gif="http://rs77.pbsrc.com/albums/j61/Black_kitsune_Rioku/Pokemon%20Platinum%20Animated%20Sprites/Metapodplatinum.gif~c200";
+            }
+            if (this.randomnum == 23) {
+              this.name="Vaporeon";
+              this.gif="https://thumbs.gfycat.com/FancyShamelessChimneyswift-max-1mb.gif";
+            }
+            if (this.randomnum == 24) {
+              this.name="Eevee";
+              this.gif="http://rs305.pbsrc.com/albums/nn211/Tama-Chan10/Pokemon/gbc133.gif~c200";
+            }
+            if (this.randomnum == 25) {
+              this.name="Bellsprout";
+              this.gif="http://38.media.tumblr.com/ab03573ca2226597a58047dbb8df0158/tumblr_n25g72z3MN1s3bc1no1_400.gif";
+            }
+            if (this.randomnum == 27) {
+              this.name="Zapdos";
+              this.gif="https://vignette.wikia.nocookie.net/pokemon/images/0/0e/Zapdos_XY.gif/revision/latest?cb=20140131073138";
+            }
+            if (this.randomnum == 28) {
+              this.name="Moltres";
+              this.gif="https://vignette.wikia.nocookie.net/pokemon/images/a/a9/Moltres_XY.gif/revision/latest?cb=20140131073446";
+            }
+            if (this.randomnum == 29) {
+              this.name="Mew";
+              this.gif="https://media.giphy.com/media/nyiPOxRx7J3hK/giphy.gif";
+            }
+            if (this.randomnum == 30) {
+              this.name="Haunter";
+              this.gif="https://vignette.wikia.nocookie.net/es.pokemon/images/d/d7/Haunter_XY_%283%29.gif/revision/latest?cb=20131120224957";
+            }
+            if (this.randomnum == 31) {
+              this.name="Latias";
+              this.gif="http://rs1212.pbsrc.com/albums/cc457/hafiznr/pokemon%20sprites/380.gif~c200";
+            }
+            if (this.randomnum == 32) {
+              this.name="Ratata";
+              this.gif="http://rs248.pbsrc.com/albums/gg199/alex061095/Pokemon%20Sprites/rattata.gif~c200";
+            }
+            if (this.randomnum == 33) {
+              this.name="Raticate";
+              this.gif="https://vignette.wikia.nocookie.net/es.pokemon/images/1/1d/Raticate_de_Alola_SL_variocolor.gif/revision/latest?cb=20161130181458";
+            }
+            if (this.randomnum == 34) {
+              this.name="Ponyta";
+              this.gif="http://rs1212.pbsrc.com/albums/cc449/PokemonOtakuOrg/pokemon/077.gif~c200";
+            }
+            if (this.randomnum == 35) {
+              this.name="Luxray";
+              this.gif="https://vignette4.wikia.nocookie.net/pokemon/images/2/24/Luxray-AttackAnimation-XY-1.gif/revision/latest?cb=20160628025358";
+            }
+            if (this.randomnum == 36) {
+              this.name="Chatot";
+              this.gif="https://66.media.tumblr.com/300b6e464bd58eb240e75d658367adaa/tumblr_noxx6dMHcv1scncwdo1_500.gif";
+            }
+            if (this.randomnum == 37) {
+              this.name="Clefairy";
+              this.gif="https://thumbs.gfycat.com/GraciousCautiousDuckbillplatypus-small.gif";
+            }
+            if (this.randomnum == 38) {
+              this.name="Combee";
+              this.gif="https://31.media.tumblr.com/01c32d4cc2efbebaba91dcdf7991959b/tumblr_msqaegEyO01scncwdo1_500.gif";
+            }
+            if (this.randomnum == 39) {
+              this.name="Bulbasaur";
+              this.gif="https://thumbs.gfycat.com/HopefulGreatIndianjackal-max-1mb.gif";
+            }
+            if (this.randomnum == 40) {
+              this.name="Dragonite";
+              this.gif="https://vignette.wikia.nocookie.net/fakemon/images/4/46/Dragonite_XY_PkParaiso.gif/revision/latest?cb=20131219230227&path-prefix=es";
+            }
+            if (this.randomnum == 41) {
+              this.name="Arceus";
+              this.gif="https://media.giphy.com/media/p7pZmOXvPDeko/200w.gif";
+            }
+            if (this.randomnum == 42) {
+              this.name="Luxio";
+              this.gif="https://vignette.wikia.nocookie.net/pokemon/images/e/ea/Luxio-AttackAnimation-XY-1.gif/revision/latest?cb=20160624030745";
+            }
+            if (this.randomnum == 43) {
+              this.name="Marowak";
+              this.gif="https://thumbs.gfycat.com/DescriptiveSilkyHypacrosaurus-size_restricted.gif";
+            }
+            if (this.randomnum == 44) {
+              this.name="Vulpix";
+              this.gif="http://rs735.pbsrc.com/albums/ww359/DragonQueen12/5th%20Gen%20Animated%20Sprites/037.gif~c200";
+            }
+            if (this.randomnum == 45) {
+              this.name="Golem";
+              this.gif="http://rs1247.pbsrc.com/albums/gg632/shy12312/Golem.gif~c200";
+            }
+            if (this.randomnum == 46) {
+              this.name="Porygon";
+              this.gif="https://thumbs.gfycat.com/WeepyMinorHydra-size_restricted.gif";
+            }
+            if (this.randomnum == 47) {
+              this.name="Quagsire";
+              this.gif="https://i.gifer.com/1Pxy.gif";
+            }
+            if (this.randomnum == 48) {
+              this.name="Deoxys";
+              this.gif="https://66.media.tumblr.com/26bde14b82da00966651862198c8d028/tumblr_pdnktenr101scncwdo1_540.gif";
+            }
+            if (this.randomnum == 49) {
+              this.name="Solgaleo";
+              this.gif="http://i.imgur.com/aENiQLZ.gif";
+            }
+            if (this.randomnum == 50) {
+              this.name="Rayquaza";
+              this.gif="https://vignette.wikia.nocookie.net/pokemon/images/1/15/Rayquaza_XY_Shiny_Sprite.gif/revision/latest?cb=20141118065056";
+            }
+            if (this.randomnum == 51) {
+              this.name="Camerupt";
+              this.gif="https://steamusercontent-a.akamaihd.net/ugc/850468334276967241/3AC3936ABB0643D82DF258A6CD0D3CC138E1C65D/";
+            }
+            if (this.randomnum == 52) {
+              this.name="Onix";
+              this.gif="https://steamusercontent-a.akamaihd.net/ugc/850468334276967241/3AC3936ABB0643D82DF258A6CD0D3CC138E1C65D/";
+            }
+            if (this.randomnum == 53) {
+              this.name="Onix";
+              this.gif="http://25.media.tumblr.com/tumblr_m5zyheRG0l1qj7ct2o1_500.gif";
+            }
+            if (this.randomnum == 54) {
+              this.name="Machop";
+              this.gif="http://rs35.pbsrc.com/albums/d191/adods/PokemonSprite/066.gif~c200";
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
